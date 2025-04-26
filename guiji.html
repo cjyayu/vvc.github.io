@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>实时位置</title> <!-- 页面标题 -->
+    <meta charset="UTF-8"> <!-- 设置字符编码为UTF-8 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"><!-- 移动端适配：宽度等于设备宽度，初始缩放1倍，禁止用户缩放 -->
+    <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=2.0&ak=fK3twu4FSySMcxIM9aQ7qzcLKQvOogTz&services=&t=20240108120844"></script>
+    <!-- 引入百度地图JavaScript API（v2.0版本）
+         ak=你的百度地图开发者密钥
+         services=启用服务（默认空，按需添加）
+         t=时间戳（用于缓存控制）
+    -->
+
+    //自定义样式
+    <style>
+    .BMapLabel{
+        max-width: none !important;/* 取消标注气泡的最大宽度限制 */
+        color: red !important; /* 标注文字颜色为红色 */
+        font-size: 18px !important; /* 标注文字大小18像素 */
+        font-weight: bold !important;/* 标注文字加粗 */
+    }
+
+
+</style>
+
+    //地图容器 HTML
+</head>
+<body>
+<div  >
+
+
+    <div id="allmap" style="height: 600px;width: 100%;margin: auto"></div>
+</div>
+//全局变量与地图初始化
+<script>
+		 var map ;// 声明地图对象变量
+
+	window.onload = function() {// 页面加载完成后执行初始化
+
+
+		map = new BMap.Map("allmap");// 创建地图实例，关联HTML中的容器id
+		map.centerAndZoom("成都", 15);// 初始化地图中心为"成都"，缩放级别15（1-19级，数值越大越精细）
+
+		map.enableScrollWheelZoom(true);// 启用鼠标滚轮缩放功能
+
+			// 显示
+			//  118.677246','24.873944
+
+		var list= '[{"lat":118.677246,"lng":24.873944},{"lat":118.672246,"lng":24.873944},{"lat":118.673246,"lng":24.873944}]'
+ / //测试数据：JSON格式的经纬度数组
+
+<!--		setTimeout(function(){-->
+<!--			go(list);--> // 延迟2秒执行go函数
+
+<!--		},2000)-->
+
+	};
+
+//go 函数：解析数据并生成标记
+function go(s){
+
+	var list = JSON.parse(s);// 将JSON字符串解析为JavaScript对象数组
+
+	console.log(list)
+
+	            map.clearOverlays();// 清除地图上所有已有覆盖物
+
+
+	        //开始初始化
+	        for (var i = 0; i < list.length; i++) {
+	            var area = list[i];// 取出当前数据项
+
+	            var point = new BMap.Point(area.lat, area.lng);// 创建百度地图坐标点
+	            var marker = new BMap.Marker(point);// 创建标记（默认图标）
+	            map.addOverlay(marker); // 将标记添加到地图上
+	            points.push({
+	                lat: area.lng, lng: area.lat
+	            });
+	            if (i == 0) {
+	                map.panTo(point);
+	            }
+	        }
+
+	        line();// 调用line函数绘制轨迹
+
+
+
+}
+
+
+
+
+
+
+var points = [];// 存储标记坐标（用于绘制红色轨迹）
+
+function line() {
+    var list = points;// 读取标记坐标数组
+
+    var opts = {
+        width: 50,     // 信息窗口宽度
+        height: 50,     // 信息窗口高度
+        title: '', // 信息窗口标题
+        enableMessage: true//设置允许信息窗发送短息
+    };
+
+
+    var carMk;// 标记变量
+    var myBeginIcon = new BMap.Icon("/statics/circle.png", new BMap.Size(20, 20), {imageOffset: new BMap.Size(0, 0)});
+
+    function drawGreenLine(i) {
+        var polyline = new BMap.Polyline([//网页端使用百度地图 Polyline 类绘制轨迹线
+            new BMap.Point(list[i].lng, list[i].lat),//起始点的经纬度
+            new BMap.Point(list[i + 1].lng, list[i + 1].lat)//终点的经纬度
+        ], {
+            strokeColor: "red",
+            strokeWeight: 4, //宽度
+            strokeOpacity: 1
+        });//透明度
+        map.addOverlay(polyline);// 将折线添加到地图上
+
+    }
+// 绘制所有标记和轨迹的函数
+    function drawIcon() {
+        if (carMk) {
+            map.removeOverlay(carMk);
+        }
+
+        for (var i = 0; i < list.length - 1; i++) { // 循环添加所有标记和轨迹
+            carMk2 = new BMap.Marker(
+                new BMap.Point(list[i].lng, list[i].lat),// 标记位置
+                {icon: myBeginIcon});// 使用自定义图标
+            map.addOverlay(carMk2);// 添加标记到地图
+            drawGreenLine(i);// 绘制第i段轨迹线
+        }
+
+        carMk2 = new BMap.Marker(
+            new BMap.Point(list[list.length - 1].lng, list[list.length - 1].lat),
+            {icon: myBeginIcon});
+        map.addOverlay(carMk2);
+
+    }
+
+    drawIcon();// 调用函数绘制标记和轨迹
+}
+
+
+var points2 = [];// 存储另一组坐标
+
+function line2() {
+    var list = points2;
+
+    var opts = {
+        width: 50,     // 信息窗口宽度
+        height: 50,     // 信息窗口高度
+        title: '', // 信息窗口标题
+        enableMessage: true//设置允许信息窗发送短息
+    };
+
+
+    var carMk;
+    var myBeginIcon = new BMap.Icon("/statics/circle.png", new BMap.Size(20, 20), {imageOffset: new BMap.Size(0, 0)});
+
+    function drawGreenLine(i) {
+        var polyline = new BMap.Polyline([
+            new BMap.Point(list[i].lng, list[i].lat),//起始点的经纬度
+            new BMap.Point(list[i + 1].lng, list[i + 1].lat)//终点的经纬度
+        ], {
+            strokeColor: "blue",
+            strokeWeight: 4, //宽度
+            strokeOpacity: 1
+        });//透明度
+        map.addOverlay(polyline);
+
+    }
+
+    function drawIcon() {
+        if (carMk) {
+            map.removeOverlay(carMk);
+        }
+
+        for (var i = 0; i < list.length - 1; i++) {
+            carMk2 = new BMap.Marker(
+                new BMap.Point(list[i].lng, list[i].lat),
+                {icon: myBeginIcon});
+            map.addOverlay(carMk2);
+            drawGreenLine(i);
+        }
+
+        carMk2 = new BMap.Marker(
+            new BMap.Point(list[list.length - 1].lng, list[list.length - 1].lat),
+            {icon: myBeginIcon});
+        map.addOverlay(carMk2);
+
+    }
+
+
+
+    drawIcon();
+}
+
+
+
+
+</script>
+</body>
+</html>
