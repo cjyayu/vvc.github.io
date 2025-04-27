@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>实时位置</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=2.0&ak=fK3twu4FSySMcxIM9aQ7qzcLKQvOogTz&services=&t=20240108120844"></script>
+
+    //自定义样式
+    <style>
+    .BMapLabel{
+        max-width: none !important;
+        color: red !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+    }
+
+
+</style>
+</head>
+<body>
+<div  >
+
+
+    <div id="a" style="text-align:center"></div>
+
+    <div id="allmap" style="height: 600px;width: 100%;margin: auto"></div>
+</div>
+
+<script>
+		 var map ;
+
+	window.onload = function() {
+		document.getElementById("a").innerHTML = '地图加载中...'
+		try{
+
+			setTimeout(function(){
+			    map = new BMap.Map("allmap");
+			map.centerAndZoom("成都", 15);
+			map.enableScrollWheelZoom(true);
+
+			document.getElementById("a").innerHTML = '地图加载完毕...'
+
+			},2000);
+
+		}catch(e){
+
+			document.getElementById("a").innerHTML = e
+
+		}
+
+	};
+
+
+
+
+    var  marker ;
+
+    function area(lat,lng) {
+
+        map = new BMap.Map("allmap");
+			map.centerAndZoom("成都", 15);
+			map.enableScrollWheelZoom(true);
+
+
+        map.clearOverlays();
+        var point = new BMap.Point( lat,  lng);
+        marker = new BMap.Marker(point);
+        var label = new BMap.Label('当前位置' ,{offset:new BMap.Size(20,-10)});
+        marker.setLabel(label);
+        map.addOverlay(marker);// 在地图上显示标记
+        setTimeout(function () {
+            map.panTo(point);
+
+        },1000)
+
+    }
+
+
+</script>
+</body>
+</html>
